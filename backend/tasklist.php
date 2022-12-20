@@ -17,7 +17,7 @@ if(isset($_POST['action'])){
 
     switch ($_POST['action']){
         case "addTask":
-            addTask($_POST['taskText'], $conn, $userId);
+            addTask(htmlspecialchars($_POST['taskText']), $conn, $userId);
             break;
         case "removeAll":
             removeAll($conn, $userId);
