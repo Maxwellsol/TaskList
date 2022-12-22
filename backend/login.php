@@ -17,14 +17,14 @@ if(isset($_POST["login"])){
                 authUser($data);
             }else{
                 $message = 'Wrong password!';
-                $location = '../front/login_page.php';
+                $location = $_SERVER['HTTP_HOST'].'/front/login_page.php';
                 messageReturn($message, $location);
             }
         }else {
             registerUser($conn, $login, $password);
         }
     }else{
-        $location = '../front/login_page.php';
+        $location = $_SERVER['HTTP_HOST'].'/front/login_page.php';
         $message = "All fields require!";
         messageReturn($message, $location);
     }
@@ -32,7 +32,7 @@ if(isset($_POST["login"])){
 
 function authUser($data){
     $message = "";
-    $location = "../index.php";
+    $location = $_SERVER['HTTP_HOST']."/index.php";
     $_SESSION['session_username'] = $data['login'];
     $_SESSION['user_id'] = $data['id'];
     messageReturn($message, $location);
@@ -50,10 +50,10 @@ function registerUser($conn, $login, $password){
         $_SESSION['session_username'] = $login;
         $_SESSION['user_id'] = $conn->lastInsertId();
         $message =  "";
-        $location = "../../index.php";
+        $location = $_SERVER['HTTP_HOST']."/index.php";
         messageReturn($message, $location);
     } catch (PDOException $e) {
-        $location = '../front/login_page.php';
+        $location = $_SERVER['HTTP_HOST'].'/front/login_page.php';
         $message = "DatabaseError:".$e->getMessage();
         messageReturn($message, $location);
     }
@@ -61,8 +61,8 @@ function registerUser($conn, $login, $password){
 
 function messageReturn($message, $location){
     if($message!=''){
-        header("Location: ".$location."?msg=".urlencode($message));
+        header("Location: http://".$location."?msg=".urlencode($message));
     }else{
-        header("Location: ".$location);
+        header("Location: http://".$location);
     }
 }

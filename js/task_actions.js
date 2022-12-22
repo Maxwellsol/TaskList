@@ -1,56 +1,43 @@
 $("#addTask").click(function (e) {
     e.preventDefault();
     var taskText = $("#taskTextInput").val();
-    $.ajax({
-        type: "POST",
-        url: "../backend/tasklist.php",
-        data: {
-            action: "addTask"
-            ,taskText: taskText
+    data = {
+        action: "addTask"
+        , taskText: taskText
+    }
+    tbody = document.querySelector("tbody");
+    template = document.querySelector('#taskRow');
+    clone = template.content.cloneNode(true);
+
+    ajaxRequest(data).then(function (response) {
+        if (response != null) {
+            td = clone.querySelectorAll("td");
+            td[0].textContent = response;
+            td[1].textContent = taskText;
+            tbody.appendChild(clone);
         }
-    }).done(function (response) {
-         if (response != null) {
-             var appendedData = '<tr><td id="taskId" hidden>'
-                 + response +
-                 '<td style="width:80%">'
-                 + taskText +
-                 '</td><td class="noborder">' +
-                 '<button class="btn" id="taskStatus" value="ready" style="color:#ff0000">READY</button>' +
-                 '</td><td class="noborder"><button class="btn" value="delete">DELETE</button></td>';
-
-             $('#taskTbl tbody').append(appendedData);
-
-         }
     });
 });
 
-$("#removeAllBtn").click(function(e) {
+$("#removeAllBtn").click(function (e) {
     e.preventDefault();
-
-    $.ajax({
-        type: "POST",
-        url: "../backend/tasklist.php",
-        data: {
-            action: 'removeAll'
-        }
-    }).done(function( response ) {
-        if(response === 'all deleted'){
+    data = {
+        action: 'removeAll'
+    }
+    ajaxRequest(data).then(function (response) {
+        if (response === 'all deleted') {
             $("#taskTbl tr").remove();
-
         }
     });
 });
 
-$("#readyAllBtn").click(function(e) {
+$("#readyAllBtn").click(function (e) {
     e.preventDefault();
-    $.ajax({
-        type: "POST",
-        url: "../backend/tasklist.php",
-        data: {
-            action: 'readyAll'
-        }
-    }).done(function( response ) {
-        if(response === 'all ready'){
+    data = {
+        action: 'readyAll'
+    }
+    ajaxRequest(data).then(function (response) {
+        if (response === 'all ready') {
             var btns = document.getElementsByClassName('task-button-done');
             for (i = 0; i < btns.length; ++i) {
                 btns[i].style.cssText = 'color:green';
@@ -59,47 +46,50 @@ $("#readyAllBtn").click(function(e) {
     });
 });
 
-$("#taskTbl").on("click","#taskStatus",  function(e) {
+$("#taskTbl").on("click", "#taskStatus", function (e) {
     e.preventDefault();
     var rowId = $(this).closest('tr').find('#taskId').text();
-    var btnText = $(this).text();
-    if(btnText ==='READY') {
-        $(this).cssText = 'color:red';
-    }else{
-        $(this).cssText = 'color:green';
+
+    data = {
+        action: 'changeStatus',
+        taskId: rowId
     }
-    $.ajax({
-        type: "POST",
-        url: "../backend/tasklist.php",
-        data: {
-            action: 'changeStatus',
-            taskId: rowId
-        }
-    }).done(function( response ) {
-        if(response == 1){
+
+    ajaxRequest(data).then(function (response) {
+        if (response === 1) {
             document.getElementById("taskStatus").style.color = 'green';
-        }else{
+        } else {
             document.getElementById("taskStatus").style.color = 'red';
         }
     });
 });
 
-
-
-$("#taskTbl").on("click","#taskDelete",  function(e) {
+$("#taskTbl").on("click", "#taskDelete", function (e) {
     e.preventDefault();
     var row = $(this).closest('tr');
     var rowId = row.find('#taskId').text()
-    $.ajax({
-        type: "POST",
-        url: "../backend/tasklist.php",
-        data: {
-            action: 'deleteTask',
-            taskId: rowId
-        }
-    }).done(function( response ) {
-        if(response != null){
+    data = {
+        action: 'deleteTask',
+        taskId: rowId
+    }
+
+    ajaxRequest(data).then(function (response) {
+        if (response != null) {
             row.remove();
         }
     });
+
 });
+
+function ajaxRequest(data) {
+    backUrl = window.location.origin + '/backend/tasklist.php';
+
+    return $.ajax({
+        type: "POST",
+        url: backUrl,
+        data: data
+    }).done(function (response) {
+        return response;
+    });
+
+}
